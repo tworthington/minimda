@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+# 2015 public domain, by Thomas Worthingon
+# Pass in the directory you want the email to be
+# placed in. Mail will be put in a subdirectory
+# called /new
+# Does not create directories
+
+die("Need directory\n") unless $directory=shift;
+
+my $username = $ENV{LOGNAME} || $ENV{USER} || getpwuid($<);
+
+
+if((substr($directory,0,1)) ne "/")
+{
+    $directory="/home/$username/$directory";
+}
+
+$directory.='/new';
+
+die("Can't find target directory $directory\n") unless (-d $directory);
+
+$seconds=time();
+
+$filename="$directory/$seconds.$$";
+
+$tiebreak=0;
+while(-f $filename."_$tiebreak.mbs")
+{
+    $tiebreak++;
+}
+
+$filename.="_$tiebreak.mbs";
+
+umask 0077;
+
+open(OUT,">$filename") or die("Can't open $filename\n");
+
+while(<STDIN>)
+{
+    print OUT $_;
+}
+
+close OUT;
+
+exit(0);
